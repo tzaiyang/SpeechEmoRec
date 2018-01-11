@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 # Path to the textfiles for the trainings and validation set
-Data_Directory = '/home/ryan/Documents/AlexForAudio_In_Out/'
+Data_Directory = '/home/liwei/Documents/AlexForAudio_In_Out/'
 
 train_file = '%s%s' % (Data_Directory, 'txts/03/train.txt')
 val_file = '%s%s' % (Data_Directory, 'txts/03/test.txt')
@@ -25,7 +25,7 @@ batch_size = 64
 
 # Network params
 dropout_rate = 0.5
-num_classes = 4
+num_classes = 7
 train_layers = ['fc8', 'fc7', 'fc6', 'conv5', 'conv4', 'conv3', 'conv2', 'conv1']
 
 # How often we want to write the tf.summary data to disk
@@ -143,7 +143,7 @@ val_batches_per_epoch = int(np.floor(val_data.data_size / batch_size))
 
 # Start Tensorflow session
 with tf.Session() as sess:
-    with tf.device('/cpu:0'):
+    with tf.device('/gpu:0'):
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
 
@@ -218,4 +218,5 @@ with tf.Session() as sess:
 
         graph = tf.graph_util.convert_variables_to_constants(sess, sess.graph_def, ['test/prob'])
 
-        tf.train.write_graph(graph, '.', 'alex_model.pb', as_text=False)
+        alex_model_file = '%s%s' % (Data_Directory,'alex_model.pb')
+        tf.train.write_graph(graph, '.', alex_model_file, as_text=False)
