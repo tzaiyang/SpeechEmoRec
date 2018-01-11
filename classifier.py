@@ -15,7 +15,7 @@ from global_path import Data_Directory
 svm_model = '%s%s' % (Data_Directory, 'svm_model.m')
 graph_filename = '%s%s' % (Data_Directory, 'alex_model.pb')
 
-test_wav = '%s%s' % (Data_Directory, 'testfiles/03_a04_anxiety_d.wav')
+test_wav = '%s%s' % (Data_Directory, 'testfiles/cry2.wav')
 # img_file_path = '/home/datasets/BabyCry/Crying/2-107351-A'
 
 

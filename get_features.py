@@ -44,7 +44,7 @@ if __name__ == '__main__':
     fc7 = graph.get_tensor_by_name('prefix/fc7/fc7:0')
     keep_prob = graph.get_tensor_by_name('prefix/Placeholder_1:0')
 
-    paths, labels = utils.load_paths(test_data_path, data_root)
+    paths, labels = utils.load_paths(train_data_path, data_root)
 
     features = []
     for i in range(len(paths)):
@@ -70,5 +70,5 @@ if __name__ == '__main__':
 
     test_feature_file = '%s%s' % (Data_Directory, 'test_features.npy')
     train_feature_file = '%s%s' % (Data_Directory, 'train_features.npy')
-    np.save(test_feature_file, features)
+    np.save(train_feature_file, features)
 
