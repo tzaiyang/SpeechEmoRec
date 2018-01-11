@@ -4,7 +4,9 @@ import numpy as np, wave
 
 np.set_printoptions(threshold=np.inf)
 
-test_path = '/home/datasets/test.wav'
+from global_path import Data_Directory
+
+test_path = '%s%s' % (Data_Directory, 'test.wav')
 
 
 def getSpectrum(fileStr, window_length_ms=25,windowOver_lenth_ms=10,frameinseg_lenth_num=64,frameinsegOver_lenth_num=30):

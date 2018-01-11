@@ -4,7 +4,7 @@ from tensorflow.python.framework import graph_util
 import utils
 import numpy as np
 
-Data_Directory = '/home/ryan/Documents/AlexForAudio_In_Out/'
+from global_path import Data_Directory
 
 def load_graph(frozen_graph_filename):
 
@@ -30,11 +30,11 @@ if __name__ == '__main__':
     graph_filename = '%s%s' % (Data_Directory, 'alex_model.pb')
     graph = load_graph(graph_filename)
 
-    test_data_path = '%s%s' % (Data_Directory, 'data/03/test_data.txt')
-    train_data_path = '%s%s' % (Data_Directory, 'data/03/train_data.txt')
+    test_data_path = '%s%s' % (Data_Directory, 'txts/03/test_data.txt')
+    train_data_path = '%s%s' % (Data_Directory, 'txts/03/train_data.txt')
 
     # data_root = '/home/datasets/Bolin_Speech/'
-    data_root = '%s%s' % (Data_Directory, 'Bolin_Speech/')
+    data_root = '%s%s' % (Data_Directory, 'melSpec_Bolin_Speech/')
 
     for op in graph.get_operations():
         print(op.name, op.values())

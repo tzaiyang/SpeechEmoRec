@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 
 
 # Path to the textfiles for the trainings and validation set
-Data_Directory = '/home/tzaiyang/Documents/AlexForAudio_In_Out/'
+from global_path import Data_Directory
 
 train_file = '%s%s' % (Data_Directory, 'txts/03/train.txt')
 val_file = '%s%s' % (Data_Directory, 'txts/03/test.txt')
-data_root = '%s%s' % (Data_Directory, 'Bolin_Speech')
+data_root = '%s%s' % (Data_Directory, 'melSpec_Bolin_Speech')
 
 
 # Learning params
@@ -143,7 +143,7 @@ val_batches_per_epoch = int(np.floor(val_data.data_size / batch_size))
 
 # Start Tensorflow session
 with tf.Session() as sess:
-    with tf.device('/gpu:1'):
+    with tf.device('/gpu:0'):
         # Initialize all variables
         sess.run(tf.global_variables_initializer())
 

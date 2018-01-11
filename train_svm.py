@@ -3,11 +3,11 @@ from sklearn.svm import SVC
 import utils
 from sklearn.externals import joblib
 
-Data_Directory = '/home/ryan/Documents/AlexForAudio_In_Out/'
+from global_path import Data_Directory
 
 test_data_path = '%s%s' % (Data_Directory, 'txts/03/test_data.txt')
 train_data_path = '%s%s' % (Data_Directory, 'txts/03/train_data.txt')
-data_root = '%s%s' % (Data_Directory, 'Bolin_Speech')
+data_root = '%s%s' % (Data_Directory, 'melSpec_Bolin_Speech')
 
 train_paths, train_labels = utils.load_paths(train_data_path, data_root)
 test_paths, test_labels = utils.load_paths(test_data_path, data_root)

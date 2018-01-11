@@ -10,8 +10,8 @@ import sys
 from melSpec import *
 
 import os
+from global_path import Data_Directory
 
-Data_Directory = '/home/ryan/Documents/AlexForAudio_In_Out/'
 svm_model = '%s%s' % (Data_Directory, 'svm_model.m')
 graph_filename = '%s%s' % (Data_Directory, 'alex_model.pb')
 
