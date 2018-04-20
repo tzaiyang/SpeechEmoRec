@@ -1,0 +1,4 @@
+python -m pip install --user numpy scipy matplotlib ipython jupyter pandas sympy nose
+sudo apt-get install python-tk
+sudo apt-get install python-pil
+sudo pip install librosa
