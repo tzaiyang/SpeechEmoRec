@@ -1,73 +1,162 @@
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-import numpy as np, wave
+import numpy as np,wave
+import scipy as sp
+import matplotlib.pyplot as plt
+import PIL.Image as Image
+import os,sys
+import librosa
+import librosa.display
+from pylab import *
 
-np.set_printoptions(threshold=np.inf)
+# if you want to see utterance mel spectrogram and delta,delta-delta picture,
+# set __DEBUG_ as True,and the pictures will be DEBUG directory
 
-from global_path import Data_Directory
+def gen_filename_txt(Dataset_EMODB):
+    fl=open('%s/../emodbname.txt'%(Dataset_EMODB),'w')
+    wave_filenames = os.listdir(Dataset_EMODB)
+    for filename in wave_filenames:
+        fl.write(filename)
+        fl.write('  ')
+        fl.write(filename[5:6])
+        fl.write('\n')
+    fl.close
 
-test_path = '%s%s' % (Data_Directory, 'test.wav')
+def read_wav(wav_path):
+    wavefile = wave.open(wav_path)
+    nchannels,sampwidth,framerate,nframes,comptype,compname=wavefile.getparams()
+    strdata = wavefile.readframes(nframes)
+    wavedata = np.fromstring(strdata, dtype=np.int16).astype('float32')# / (2 ** 15)
+    print ('nchnnels:%d'%nchannels)
+    print ('sampwidth:%d'%sampwidth)
+    print ('framerate:%d'%framerate)
+    print ('nframes:%d'%nframes)
+    #print ('nframes: ')
+    #print (wavedata)
+    wavefile.close()
+    return nchannels,sampwidth,framerate,nframes,wavedata
+
+def gen_utterance_melspec(wav_path):
+    """
+    Compute a mel-scaled spectrogram to a utterance wavefile
+    :param wav_path: audio time-series file
+    :return:
+    """
+    nchannels,sampwidth,framerate,nframes,wavedata = read_wav(wav_path)
+    #wavedata,framerate = librosa.core.load(wav_path)
+
+    # method 1:hamming window
+    #signal.get_window('hamming', 7)
+    #Zxx = librosa.core.stft(wavedata, n_fft=25*framerate/1000, hop_length=(25-10)*framerate/1000, window='hamming', center=True, pad_mode='reflect')
+    #Sxx = librosa.feature.melspectrogram(S=np.abs(Zxx),n_mels=64, fmin=20, fmax=8000)
+
+    # method 2:hanning window
+    Sxx = librosa.feature.melspectrogram(y=wavedata,sr=framerate,n_fft=25*framerate/1000,hop_length=(25-10)*framerate/1000,n_mels=64,fmin=20,fmax=8000)
+    return Sxx
+
+def save_utterance(X,savepath,filename="melSpec"):
+    # Convert a power spectrogram (amplitude squared) to decibel (dB) units
+    X = librosa.power_to_db(X, ref=np.max)
+    # Display a spectrogram/chromagram/cqt/etc.
+    librosa.display.specshow(X,fmin=20, fmax=8000)
+    plt.savefig("%s/%s"%(savepath,filename),bbox_inches='tight',pad_inches=0)
+    close()
+
+def gen_segments_melspec(X, window_size, overlap_sz):
+    """
+    Create an overlapped version of X
+
+    Parameters
+    ----------
+    X : ndarray, shape=(n_mels,n_samples)
+        Input signal to window and overlap
+
+    window_size : int
+        Size of windows to take
+
+    overlap_sz : int
+        Step size between windows
+
+    Returns
+    -------
+    X_strided : shape=(n_windows, window_size)
+        2D array of overlapped X
+    """
+    window_step = (window_size-overlap_sz)
+    append = np.zeros((64,(window_step - (X.shape[-1]-overlap_sz) % window_step)))
+    X = np.hstack((X, append))
+    # append zeros of end of X to get integer numbers of n_windows
+    new_shape = ((X.shape[-1] - overlap_sz) // window_step,window_size,X.shape[0])
+    new_strides = (window_step*8,X.strides[0],X.strides[-1])
+    X_strided = np.lib.stride_tricks.as_strided(X, shape=new_shape, strides=new_strides)
+
+    return X_strided
+
+def save_segment(X,pic_path):
+    librosa.display.specshow(X, fmin=20, fmax=8000)
+    plt.savefig(pic_path, bbox_inches='tight', pad_inches=0)
+    # plt.imsave(pic_path,X)
+    # sp.misc.imsave(pic_path, X)
+    close()
+
+def save_dcnn_ipput(X,pic_path):
+    #plt.imsave(pic_path,X)
+    sp.misc.imsave(pic_path,X)
+    #sp.misc.toimage(X).save(pic_path)
+    close()
+    pri_image = Image.open(pic_path)
+    pri_image.resize((227,227),Image.ANTIALIAS).save(pic_path)
 
 
-def getSpectrum(fileStr, window_length_ms=25,windowOver_lenth_ms=10,frameinseg_lenth_num=64,frameinsegOver_lenth_num=30):
-    # window_length_ms  是以毫秒为单位的窗长
-    # frame_shift_times 是以毫秒为单位的帧移
-    # frame_length_ms   是以毫秒为单位的帧长
-        # 读音频文件
-        wav_file = wave.open(fileStr, 'r')
-        # 获取音频文件的各种参数
-        params = wav_file.getparams()
-        nchannels, sampwidth, framerate, wav_length = params[:4]
-        # 获取音频文件内的数据，不知道为啥获取到的竟然是个字符串，还需要在numpy中转换成short类型的数据
-        str_data = wav_file.readframes(wav_length)
-        wave_data = np.fromstring(str_data, dtype=np.short)
-        s = len(wave_data)
+def gen_dcnn_input(wav_path,savepath,filename):
+    utterance_melspec = gen_utterance_melspec(wav_path)
+    if _DEBUG_:
+        save_utterance(utterance_melspec,savepath)
 
-        # 将窗长从毫秒转换为点数
-        window_length = int(framerate * window_length_ms / 1000)
-        windowOver_lenth = int(framerate * windowOver_lenth_ms / 1000)
-        windowOver_lenth = int( window_length / 2)
-        frameinseg_lenth_ms = 10*(frameinseg_lenth_num-1)+25
-        frameinsegOver_lenth_ms = 10 * (frameinsegOver_lenth_num - 1) + 25
-        frameinseg_length = int(framerate * frameinseg_lenth_ms / 1000)
-        frameinsegOver_length = int(framerate * frameinsegOver_lenth_ms / 1000)
-        # print("frame_length:", frameinseg_length)
-        # print("frameinsegOver_length:", frameinsegOver_length)
-        ##初始化窗口
+    segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=30)
+    dcnninname = open(Dataset_FILENAME,'a')
+    for num in range(0, segments_melspec.shape[0]):
+        static = librosa.power_to_db(segments_melspec[num], ref=np.max)
+        delta = librosa.feature.delta(static, order=1)
+        delta2 = librosa.feature.delta(static, order=2)
+        if _DEBUG_:
+            save_segment(static,pic_path="%s/%s%d.png" % (savepath, "static", num))
+            save_segment(delta, pic_path="%s/%s%d.png" % (savepath, "delta", num))
+            save_segment(delta2,pic_path = "%s/%s%d.png" % (savepath, "delta_", num))
 
-        h=window_length-windowOver_lenth
-        win = np.hamming(window_length)
+        images = np.dstack((static,delta,delta2))
 
-        # 计算总帧数，并创建一个空矩阵
-        # nframe =int(wav_length / frame_length)
-        # 循环计算每一个窗内的fft值
-        startN = 0
-        c=1
-        # filePatholdd = genDir(filePathNames, "old")
-        # filePathneww = genDir(filePathNames, "new")
-        images = []
-        while ((s-startN)>=frameinseg_length):
-            ncols = 1 + int((frameinseg_length - window_length) / h)
-            spec = np.zeros((int(window_length / 2), ncols))
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)
 
-            for i in range(0,ncols):
-                start = startN+i*h
-                end = start + window_length  # [:window_length/2]是指只留下前一半的fft分量
-                u = [x * y for x, y in zip(win, wave_data[start:end])]
-                # print(type(u))
-                # print(i)
-                spec[:, i] = np.log(np.abs(np.fft.fft(u)))[:int(window_length / 2)]
+        pic_path = '%s/%s%d.png' % (savepath, filename, num)
+        if not _DEBUG_:
+            dcnninname.write('%s\n'%pic_path)
+        save_dcnn_ipput(images,pic_path)
+    dcnninname.close()
 
-            c = c + 1
-            startN=startN+frameinseg_length-frameinsegOver_length
-            images.append(spec)
-
-        return images
-
-
-# 测试代码
 if __name__ == '__main__':
-    spe = getSpectrum(test_path)
-    print(len(spe))
-    for i in range(len(spe)):
-        print(spe[i].shape)
+    Dataset_EMODB = "Dataset/EMODB"
+    Dataset_DCNN = "Dataset/DCNN_IN"
+    Dataset_DEBUG = "Dataset/DEBUG"
+    Dataset_FILENAME = "Dataset/dcnninname.txt"
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '-d':
+            _DEBUG_ = True
+    else:
+        _DEBUG_ = False
+
+    gen_filename_txt(Dataset_EMODB)
+    if not _DEBUG_:
+        if os.path.exists(Dataset_FILENAME):
+            os.remove(Dataset_FILENAME)
+    wave_filenames = os.listdir(Dataset_EMODB)
+    for filename in wave_filenames:
+        wav_path = '%s/%s' % (Dataset_EMODB, filename)
+        save_path = '%s/%s' % (Dataset_DCNN, filename)
+        if _DEBUG_:
+            if not os.path.exists(Dataset_DEBUG):
+                os.makedirs(Dataset_DEBUG)
+            gen_dcnn_input(wav_path, Dataset_DEBUG, filename[5:6])
+            print(filename)
+            break
+        gen_dcnn_input(wav_path, save_path, filename[5:6])
+
