@@ -10,19 +10,19 @@ import tarfile
 def load_data(DatasetDir,filename,source_url, obj_directory):
     dataset_file = os.path.join(DatasetDir, filename)
     if not os.path.exists(dataset_file):
-        tarpath = maybe_download(filename,source_url,DatasetDir,obj_directory)
+        tarpath = maybe_download(filename,source_url,DatasetDir)
 
     if not os.path.exists(obj_directory):
-        untar(filename, filename.split('.')[0])
+        untar(DatasetDir+filename, filename.split('.')[0])
         build_class_directories(filename,obj_directory)
 
-def maybe_download(filename, source_url, work_directory,obj_directory):
+def maybe_download(filename, source_url, work_directory):
     if not os.path.exists(work_directory):
         os.mkdir(work_directory)
     filepath = os.path.join(work_directory, filename)
     if not os.path.exists(filepath):
-        print("Downloading Dataset from %s, Please "
-              "wait..."%source_url)
+        print("Downloading %s from %s, Please "
+              "wait..."%(filename,source_url))
         filepath, _ = urllib.request.urlretrieve(source_url,
                                                  filepath, reporthook)
         statinfo = os.stat(filepath)
@@ -86,4 +86,4 @@ def untar(fname, extract_dir):
 if __name__ == "__main__":
     url = 'http://www.emodb.bilderbar.info/download/download.zip'
     server_fname = url.split('/')[-1]
-    load_data(DatasetDir="./Dataset", filename=server_fname, source_url=url,obj_directory='Dataset/EMODB')
+    load_data(DatasetDir="Dataset/", filename=server_fname, source_url=url,obj_directory='Dataset/EMODB')

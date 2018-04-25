@@ -1,3 +1,4 @@
+from __future__ import division, print_function, absolute_import
 import numpy as np,wave
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -44,12 +45,11 @@ def gen_utterance_melspec(wav_path):
     #wavedata,framerate = librosa.core.load(wav_path)
 
     # method 1:hamming window
-    #signal.get_window('hamming', 7)
-    #Zxx = librosa.core.stft(wavedata, n_fft=25*framerate/1000, hop_length=(25-10)*framerate/1000, window='hamming', center=True, pad_mode='reflect')
-    #Sxx = librosa.feature.melspectrogram(S=np.abs(Zxx),n_mels=64, fmin=20, fmax=8000)
-
+    # sp.signal.get_window('hamming', 7)
+    # Zxx = librosa.core.stft(wavedata, n_fft=25*framerate/1000, hop_length=(25-10)*framerate/1000, window='hamming', center=True, pad_mode='reflect')
+    # Sxx = librosa.feature.melspectrogram(S=np.abs(Zxx),n_mels=64, fmin=20, fmax=8000)
     # method 2:hanning window
-    Sxx = librosa.feature.melspectrogram(y=wavedata,sr=framerate,n_fft=25*framerate/1000,hop_length=(25-10)*framerate/1000,n_mels=64,fmin=20,fmax=8000)
+    Sxx = librosa.feature.melspectrogram(y=wavedata,sr=framerate,n_fft=(int)(25*framerate/1000),hop_length=(int)((25-10)*framerate/1000),n_mels=64,fmin=20,fmax=8000)
     return Sxx
 
 def save_utterance(X,savepath,filename="melSpec"):
@@ -102,8 +102,8 @@ def save_dcnn_ipput(X,pic_path):
     sp.misc.imsave(pic_path,X)
     #sp.misc.toimage(X).save(pic_path)
     close()
-    pri_image = Image.open(pic_path)
-    pri_image.resize((227,227),Image.ANTIALIAS).save(pic_path)
+    # pri_image = Image.open(pic_path)
+    # pri_image.resize((227,227),Image.ANTIALIAS).save(pic_path)
 
 
 def gen_dcnn_input(wav_path,savepath,filename):
@@ -112,7 +112,8 @@ def gen_dcnn_input(wav_path,savepath,filename):
         save_utterance(utterance_melspec,savepath)
 
     segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=30)
-    dcnninname = open(Dataset_FILENAME,'a')
+    train_file = open(TrainDataset_FILENAME,'a')
+    val_file = open(ValDataset_FILENAME,'a')
     for num in range(0, segments_melspec.shape[0]):
         static = librosa.power_to_db(segments_melspec[num], ref=np.max)
         delta = librosa.feature.delta(static, order=1)
@@ -129,15 +130,40 @@ def gen_dcnn_input(wav_path,savepath,filename):
 
         pic_path = '%s/%s%d.png' % (savepath, filename, num)
         if not _DEBUG_:
-            dcnninname.write('%s\n'%pic_path)
+            # configuring '09' speaker as validation dataset
+            if wav_path.split('/')[-1][:2] == '09':
+                val_file.write('%s %s\n'%(pic_path,labels_dict[filename]))
+            else:
+                train_file.write('%s %s\n'%(pic_path,labels_dict[filename]))
+        #dcnninname.write('%s %s\n' % (pic_path, labels_dict[filename]))
         save_dcnn_ipput(images,pic_path)
-    dcnninname.close()
+    train_file.close()
+    val_file.close()
 
 if __name__ == '__main__':
     Dataset_EMODB = "Dataset/EMODB"
     Dataset_DCNN = "Dataset/DCNN_IN"
     Dataset_DEBUG = "Dataset/DEBUG"
-    Dataset_FILENAME = "Dataset/dcnninname.txt"
+    TrainDataset_FILENAME = "Dataset/train_file.txt"
+    ValDataset_FILENAME = "Dataset/val_file.txt"
+    #
+    # labels_dict = {'W':[1,0,0,0,0,0,0],
+    #                'L':[0,1,0,0,0,0,0],
+    #                'E':[0,0,1,0,0,0,0],
+    #                'A':[0,0,0,1,0,0,0],
+    #                'F':[0,0,0,0,1,0,0],
+    #                'T':[0,0,0,0,0,1,0],
+    #                'N':[0,0,0,0,0,0,1]}
+
+    labels_dict = {'W':1,
+                   'L':2,
+                   'E':3,
+                   'A':4,
+                   'F':5,
+                   'T':6,
+                   'N':7
+    }
+
     if len(sys.argv) > 1:
         if sys.argv[1] == '-d':
             _DEBUG_ = True
@@ -146,8 +172,10 @@ if __name__ == '__main__':
 
     gen_filename_txt(Dataset_EMODB)
     if not _DEBUG_:
-        if os.path.exists(Dataset_FILENAME):
-            os.remove(Dataset_FILENAME)
+        if os.path.exists(TrainDataset_FILENAME):
+            os.remove(TrainDataset_FILENAME)
+        if os.path.exists(ValDataset_FILENAME):
+            os.remove(ValDataset_FILENAME)
     wave_filenames = os.listdir(Dataset_EMODB)
     for filename in wave_filenames:
         wav_path = '%s/%s' % (Dataset_EMODB, filename)

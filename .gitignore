@@ -108,7 +108,5 @@ venv.bak/
 
 
 # Dataset
-Dataset/DCNN_IN/
-Dataset/DEBUG/
-Dataset/EMODB/
-Dataset/download.zip
+Dataset/
+bvlc_alexnet.npy
