@@ -189,22 +189,25 @@ with tf.Session(config=config) as sess:
         sess.run(validation_init_op)
         test_acc = 0.
         test_count = 0
+        test_loss = 0
         for _ in range(val_batches_per_epoch):
 
             img_batch, label_batch = sess.run(next_batch)
-            acc = sess.run(accuracy, feed_dict={x: img_batch,
+            acc,loss_value = sess.run((accuracy,loss), feed_dict={x: img_batch,
                                                 y: label_batch,
                                                 keep_prob: 1.})
+            test_loss += loss_value
+
             test_acc += acc
             test_count += 1
         test_acc /= test_count
-        print("{} Validation Accuracy = {:.4f}".format(datetime.now(),
-                                                       test_acc))
+        test_loss /= test_count
+        print("{} Validation Accuracy = {:.4f}".format(datetime.now(),test_acc))
+        print("{} loss = {:.4f}".format(datetime.now(),test_loss))
         print("{} Saving checkpoint of model...".format(datetime.now()))
 
         # save checkpoint of the model
-        checkpoint_name = os.path.join(checkpoint_path,
-                                       'model_epoch'+str(epoch+1)+'.ckpt')
+        checkpoint_name = os.path.join(checkpoint_path,'model_epoch'+str(epoch+1)+'.ckpt')
         save_path = saver.save(sess, checkpoint_name)
 
         print("{} Model checkpoint saved at {}".format(datetime.now(),
