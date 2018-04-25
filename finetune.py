@@ -9,8 +9,7 @@ post, which you can find here:
 https://kratzert.github.io/2017/02/24/finetuning-alexnet-with-tensorflow.html
 
 Author: Frederik Kratzert
-contact: f.kratzert(at)gmail.com
-"""
+contact: f.kratzert(at)gmail.com """
 
 import os
 
@@ -34,14 +33,13 @@ weights_path = weights_path_url.split('/')[-1]
 load_emodb.maybe_download(weights_path,weights_path_url,'./')
 
 # Learning params
-learning_rate = 0.01
-num_epochs = 10
-batch_size = 128
-
+learning_rate = 0.001
+num_epochs = 300 
+batch_size = 30
 # Network params
 dropout_rate = 0.5
 num_classes = 7
-train_layers = ['fc8']
+train_layers = ['fc6','fc7','fc8']
 
 # How often we want to write the tf.summary data to disk
 display_step = 20
@@ -56,7 +54,7 @@ Main Part of the finetuning Script.
 
 # Create parent path if it doesn't exist
 if not os.path.isdir(checkpoint_path):
-    os.mkdir(checkpoint_path)
+    os.makedirs(checkpoint_path)
 
 # Place data loading and preprocessing on the cpu
 with tf.device('/cpu:0'):
@@ -143,7 +141,9 @@ train_batches_per_epoch = int(np.floor(tr_data.data_size/batch_size))
 val_batches_per_epoch = int(np.floor(val_data.data_size / batch_size))
 
 # Start Tensorflow session
-with tf.Session() as sess:
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.5
+with tf.Session(config=config) as sess:
 
     # Initialize all variables
     sess.run(tf.global_variables_initializer())
