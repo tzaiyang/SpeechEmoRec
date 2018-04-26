@@ -39,7 +39,7 @@ batch_size = 30
 # Network params
 dropout_rate = 0.5
 num_classes = 7
-train_layers = ['fc6','fc7','fc8']
+train_layers = ['fc8']
 
 # How often we want to write the tf.summary data to disk
 display_step = 20
@@ -165,14 +165,16 @@ with tf.Session(config=config) as sess:
 
         # Initialize iterator with the training dataset
         sess.run(training_init_op)
-
+        train_acc = 0.
+        train_count = 0
+        train_loss = 0
         for step in range(train_batches_per_epoch):
 
             # get next batch of data
             img_batch, label_batch = sess.run(next_batch)
 
             # And run the training op
-            sess.run(train_op, feed_dict={x: img_batch,
+            train_op_return,train_acc_value,train_loss_value = sess.run((train_op,accuracy,loss), feed_dict={x: img_batch,
                                           y: label_batch,
                                           keep_prob: dropout_rate})
 
@@ -183,9 +185,18 @@ with tf.Session(config=config) as sess:
                                                         keep_prob: 1.})
 
                 writer.add_summary(s, epoch*train_batches_per_epoch + step)
+            train_loss += train_loss_value
+            train_acc += train_acc_value
+            train_count += 1
+        train_acc /= train_count
+        train_loss /= train_count 
+        print("{} Training Loss = {:.4f} Accuracy = {:.4f}".format(datetime.now(),train_loss,train_acc))
+#        print("{} Training Loss = {:.4f}".format(datetime.now(),train_loss))
+#        print("{} Saving checkpoint of model...".format(datetime.now()))
+
 
         # Validate the model on the entire validation set
-        print("{} Start validation".format(datetime.now()))
+#        print("{} Start validation".format(datetime.now()))
         sess.run(validation_init_op)
         test_acc = 0.
         test_count = 0
@@ -202,13 +213,12 @@ with tf.Session(config=config) as sess:
             test_count += 1
         test_acc /= test_count
         test_loss /= test_count
-        print("{} Validation Accuracy = {:.4f}".format(datetime.now(),test_acc))
-        print("{} loss = {:.4f}".format(datetime.now(),test_loss))
-        print("{} Saving checkpoint of model...".format(datetime.now()))
+#        print("{} Validation Loss = {:.4f} Accuracy = {:.4f}".format(datetime.now(),test_loss,test_acc))
+#        print("{} Validation Loss = {:.4f}".format(datetime.now(),test_loss))
+#        print("{} Saving checkpoint of model...".format(datetime.now()))
 
         # save checkpoint of the model
         checkpoint_name = os.path.join(checkpoint_path,'model_epoch'+str(epoch+1)+'.ckpt')
         save_path = saver.save(sess, checkpoint_name)
 
-        print("{} Model checkpoint saved at {}".format(datetime.now(),
-                                                       checkpoint_name))
+#        print("{} Model checkpoint saved at {}".format(datetime.now(),checkpoint_name))
