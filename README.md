@@ -1,20 +1,34 @@
 # SpeechEmoRec
-Speech Emotion Recognition Using Deep Convolutional Neural Network and Discriminant Temporal Pyramid Matching
+[![Building Status](https://travis-ci.org/tzaiyang/SpeechEmoRec.svg?branch=master)](https://travis-ci.org/tzaiyang/SpeechEmoRec)
 
-## 运行环境要求
-ubuntu16.04, python3.5, tensorflow1.4.1, opencv3.4.0
+## Introduction
+This project aims to implement speech emotion recognition strategy proposed in *Speech Emotion Recognition Using Deep Convolutional Neural Network and Discriminant Temporal Pyramid Matching*
 
-## 代码运行说明
-### 运行准备工作
-+ 在工作目录下建立AlexForAudio_In_Out文件夹作为数据主目录
-+ 在AlexForAudio_In_Out中放入数据预处理代码的输出结果，即melSpec_Bolin_Speech，和txts两个文件夹
-+ 在global_path.py中更改输入输出数据的主目录路徑:如
-Data_Directory = '/home/ryan/Documents/AlexForAudio_In_Out/'
+## Runtime enviorment
+*CPU Host :*
++ ubuntu16.04
++ python3.5
++ tensorflow1.7.0
 
+*GPU Server :*
++ tensorflow-gpu1.7.0
++ NVIDIA driver version:390
++ cuda9.0
++ cudnn7.0
 
-### 运行步骤
-+ 运行train_alexnet.py训练alexnet网络
-+ 运行get_train_features.py得到训练集全局特征
-+ 运行get_test_features.py得到测试集全局特征
-+ 运行train_svm.py训练svm,至此可以得到整个学习的模型结果
-+ 运行classifier.py用得到的模型进行语音情感识别
+## Instructions
+1. Loading Berlin Database of Emotional Speech!
+> python load_emodb.py
+2. Preprocessing Data
+> python melSpec.py
+3. Finetune AlexNet with Tensorflow
+> python finetune.py
+
+## Refrences:
+Refrence Model:
++ Alexnet
+
+Refrence Papers:
++ ImageNet Classification with Deep Convolutional
+Neural Networks
++ Speech Emotion Recognition Using Deep Convolutional Neural Network and Discriminant Temporal Pyramid Matching
