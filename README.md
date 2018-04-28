@@ -29,6 +29,7 @@ Refrence Model:
 + Alexnet
 
 Refrence Papers:
-+ ImageNet Classification with Deep Convolutional
++ *ImageNet Classification with Deep Convolutional*
 Neural Networks
-+ Speech Emotion Recognition Using Deep Convolutional Neural Network and Discriminant Temporal Pyramid Matching
++ *Speech Emotion Recognition Using Deep Convolutional Neural Network and Discriminant Temporal Pyramid Matching*
++ *Geometric ℓp-norm feature pooling for image classification*

@@ -26,11 +26,11 @@ def read_wav(wav_path):
     nchannels,sampwidth,framerate,nframes,comptype,compname=wavefile.getparams()
     strdata = wavefile.readframes(nframes)
     wavedata = np.fromstring(strdata, dtype=np.int16).astype('float32')# / (2 ** 15)
+
     print ('nchnnels:%d'%nchannels)
     print ('sampwidth:%d'%sampwidth)
     print ('framerate:%d'%framerate)
     print ('nframes:%d'%nframes)
-    #print ('nframes: ')
     #print (wavedata)
     wavefile.close()
     return nchannels,sampwidth,framerate,nframes,wavedata
@@ -49,7 +49,9 @@ def gen_utterance_melspec(wav_path):
     # Zxx = librosa.core.stft(wavedata, n_fft=25*framerate/1000, hop_length=(25-10)*framerate/1000, window='hamming', center=True, pad_mode='reflect')
     # Sxx = librosa.feature.melspectrogram(S=np.abs(Zxx),n_mels=64, fmin=20, fmax=8000)
     # method 2:hanning window
-    Sxx = librosa.feature.melspectrogram(y=wavedata,sr=framerate,n_fft=(int)(25*framerate/1000),hop_length=(int)((25-10)*framerate/1000),n_mels=64,fmin=20,fmax=8000)
+    Sxx = librosa.feature.melspectrogram(y=wavedata,sr=framerate,n_fft=(int)(25*framerate/1000),hop_length=(int)((10)*framerate/1000),n_mels=64,fmin=20,fmax=8000)
+    #librosa.time_to_frames()
+    print(Sxx.shape)
     return Sxx
 
 def save_utterance(X,savepath,filename="melSpec"):
@@ -84,6 +86,7 @@ def gen_segments_melspec(X, window_size, overlap_sz):
     append = np.zeros((64,(window_step - (X.shape[-1]-overlap_sz) % window_step)))
     X = np.hstack((X, append))
     # append zeros of end of X to get integer numbers of n_windows
+    print(X.shape)
     new_shape = ((X.shape[-1] - overlap_sz) // window_step,window_size,X.shape[0])
     new_strides = (window_step*8,X.strides[0],X.strides[-1])
     X_strided = np.lib.stride_tricks.as_strided(X, shape=new_shape, strides=new_strides)
@@ -111,7 +114,7 @@ def gen_dcnn_input(wav_path,savepath,filename):
     if _DEBUG_:
         save_utterance(utterance_melspec,savepath)
 
-    segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=30)
+    segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=64-30)
     train_file = open(TrainDataset_FILENAME,'a')
     val_file = open(ValDataset_FILENAME,'a')
     for num in range(0, segments_melspec.shape[0]):
