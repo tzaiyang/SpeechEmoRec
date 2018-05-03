@@ -23,6 +23,11 @@ This project aims to implement speech emotion recognition strategy proposed in *
 > python melSpec.py
 3. Finetune AlexNet with Tensorflow
 > python finetune.py
+4. Discriminant Temporal Pyramid Matching
+> python dtpm.py -t
+> python dtpm.py -v
+5. Support Vector Machine
+> python svm.py
 
 ## Refrences:
 Refrence Model:
