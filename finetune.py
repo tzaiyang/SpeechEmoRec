@@ -161,7 +161,7 @@ with tf.Session(config=config) as sess:
     # Loop over number of epochs
     for epoch in range(num_epochs):
 
-        print("{} Epoch number: {}".format(datetime.now(), epoch+1))
+#        print("{} Epoch number: {}".format(datetime.now(), epoch+1))
 
         # Initialize iterator with the training dataset
         sess.run(training_init_op)
@@ -190,7 +190,6 @@ with tf.Session(config=config) as sess:
             train_count += 1
         train_acc /= train_count
         train_loss /= train_count 
-        print("{} Training Loss = {:.4f} Accuracy = {:.4f}".format(datetime.now(),train_loss,train_acc))
 #        print("{} Training Loss = {:.4f}".format(datetime.now(),train_loss))
 #        print("{} Saving checkpoint of model...".format(datetime.now()))
 
@@ -213,7 +212,8 @@ with tf.Session(config=config) as sess:
             test_count += 1
         test_acc /= test_count
         test_loss /= test_count
-#        print("{} Validation Loss = {:.4f} Accuracy = {:.4f}".format(datetime.now(),test_loss,test_acc))
+        #print("{} test loss = {:.4f} acc = {:.4f}".format(datetime.now(),test_loss,test_acc))
+        print("{} Epoch:{} Training loss= {:.4f} acc= {:.4f} test acc= {:.4f}".format(datetime.now(),epoch+1,train_loss,train_acc,test_acc))
 #        print("{} Validation Loss = {:.4f}".format(datetime.now(),test_loss))
 #        print("{} Saving checkpoint of model...".format(datetime.now()))
 
