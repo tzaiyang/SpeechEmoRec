@@ -93,11 +93,14 @@ def gen_segments_melspec(X, window_size, overlap_sz):
 
     return X_strided
 
+def normlize(x):
+    return ((x-np.min(x))/(np.max(x)-np.min(x)))
+
 def save_segment(X,pic_path):
-    librosa.display.specshow(X, fmin=20, fmax=8000)
-    plt.savefig(pic_path, bbox_inches='tight', pad_inches=0)
-    # plt.imsave(pic_path,X)
-    # sp.misc.imsave(pic_path, X)
+    # librosa.display.specshow(X, fmin=20, fmax=8000)
+    # plt.savefig(pic_path, bbox_inches='tight', pad_inches=0)
+    plt.imsave(pic_path,X)
+    #sp.misc.imsave(pic_path, X)
     close()
 
 def save_dcnn_ipput(X,pic_path):
@@ -117,10 +120,23 @@ def gen_dcnn_input(wav_path,savepath,filename):
     segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=64-30)
     train_file = open(TrainDataset_FILENAME,'a')
     val_file = open(ValDataset_FILENAME,'a')
+
+    utterance_train_file = open(TrainDataset_FILENAMES,'a')
+    utterance_val_file = open(ValDataset_FILENAMES,'a')
+    if not _DEBUG_:
+        if wav_path.split('/')[-1][:2] == '09':
+            utterance_val_file.write('%s %s\n' % (savepath, labels_dict[filename]))
+        else:
+            utterance_train_file.write('%s %s\n' % (savepath, labels_dict[filename]))
     for num in range(0, segments_melspec.shape[0]):
         static = librosa.power_to_db(segments_melspec[num], ref=np.max)
         delta = librosa.feature.delta(static, order=1)
         delta2 = librosa.feature.delta(static, order=2)
+
+        static = normlize(static)*255
+        delta = normlize(delta)*255
+        delta2 = normlize(delta2)*255
+
         if _DEBUG_:
             save_segment(static,pic_path="%s/%s%d.png" % (savepath, "static", num))
             save_segment(delta, pic_path="%s/%s%d.png" % (savepath, "delta", num))
@@ -142,6 +158,8 @@ def gen_dcnn_input(wav_path,savepath,filename):
         save_dcnn_ipput(images,pic_path)
     train_file.close()
     val_file.close()
+    utterance_train_file.close()
+    utterance_val_file.close()
 
 if __name__ == '__main__':
     Dataset_EMODB = "Dataset/EMODB"
@@ -149,6 +167,8 @@ if __name__ == '__main__':
     Dataset_DEBUG = "Dataset/DEBUG"
     TrainDataset_FILENAME = "Dataset/train_file.txt"
     ValDataset_FILENAME = "Dataset/val_file.txt"
+    TrainDataset_FILENAMES = "Dataset/train.txt"
+    ValDataset_FILENAMES = "Dataset/val.txt"
     #
     # labels_dict = {'W':[1,0,0,0,0,0,0],
     #                'L':[0,1,0,0,0,0,0],

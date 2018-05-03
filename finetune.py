@@ -28,7 +28,9 @@ Configuration Part.
 # Path to the textfiles for the trainings and validation set
 train_file = 'Dataset/train_file.txt'
 val_file = 'Dataset/val_file.txt'
+
 weights_path_url = 'http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/bvlc_alexnet.npy'
+
 weights_path = weights_path_url.split('/')[-1]
 load_emodb.maybe_download(weights_path,weights_path_url,'./')
 
@@ -222,3 +224,8 @@ with tf.Session(config=config) as sess:
         save_path = saver.save(sess, checkpoint_name)
 
 #        print("{} Model checkpoint saved at {}".format(datetime.now(),checkpoint_name))
+
+    graph = tf.graph_util.convert_variables_to_constants(sess, sess.graph_def, ['test/prob'])
+
+    alexnet_file = 'alexnet.pb'
+    tf.train.write_graph(graph, '.', alexnet_file, as_text=False)
