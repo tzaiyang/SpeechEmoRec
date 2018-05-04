@@ -49,7 +49,7 @@ def get_fc7(graph_filename,load_filename):
         features.append(out)
         print('Gain %d utterance feature' % i)
 
-    return features
+    return features,labels
 
 if __name__ == '__main__':
     print('test')

@@ -199,6 +199,10 @@ if __name__ == '__main__':
             os.remove(TrainDataset_FILENAME)
         if os.path.exists(ValDataset_FILENAME):
             os.remove(ValDataset_FILENAME)
+        if os.path.exists(TrainDataset_FILENAMES):
+            os.remove(TrainDataset_FILENAMES)
+        if os.path.exists(ValDataset_FILENAMES):
+            os.remove(ValDataset_FILENAMES)
     wave_filenames = os.listdir(Dataset_EMODB)
     for filename in wave_filenames:
         wav_path = '%s/%s' % (Dataset_EMODB, filename)

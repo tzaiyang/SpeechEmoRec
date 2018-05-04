@@ -1,8 +1,10 @@
 import numpy as np
 import sklearn.discriminant_analysis as lda
+from sklearn.neighbors import NearestNeighbors
 import sys
 import get_fc7
 import utils
+import tensorflow as tf
 
 def dtpm(features):
     '''
@@ -48,8 +50,15 @@ def dtpm(features):
 
     return features_Up
 
-def lpnorm_pooling(features_Ln):
-    result = np.max(features_Ln,axis=0)
+def lpnorm_pooling(features_Ln,var_p):
+    '''
+    :param features_Ln:
+    :param var_p: 1-average pooling, np.inf-max pooling
+    :return:
+    '''
+    lpnorm = np.linalg.norm(features_Ln,ord=var_p)
+    result = lpnorm * (1/features_Ln.shape[0])**var_p
+
     return result
 
 def div_L0(num):
@@ -67,28 +76,78 @@ def div_L1(num):
 
 
 def div_L2(num):
-    [a, b] = div_L2(num)
-    [c, d] = div_L2(a)
-    [e, f] = div_L2(b)
+    [a, b] = div_L1(num)
+    [c, d] = div_L1(a)
+    [e, f] = div_L1(b)
 
     return [c, d, e, f]
 
 
-def Solve_Weights(features_Up):
-    X = features_Up
-    y = np.array([1, 1, 1, 2, 2, 2])
-
+def solve_weights(graph_filename,load_filename):
+    features_Vp, labels = get_features_Vp(graph_filename, load_filename)
     clf = lda.LinearDiscriminantAnalysis(solver='eigen',shrinkage=None,priors=None,
                                          n_components=None)
-    clf.fit(X, y)
-    print(clf.predict([[-0.8, -1]]))
+    clf.fit(features_Vp, labels)
+    print(clf.predict(features_Vp[0]))
     print(clf.coef_)
+    return clf.coef_
 
+def get_object_function(graph_filename,load_filename):
+    features_Vp, labels = get_features_Vp(graph_filename, load_filename)
+    weights = solve_weights(graph_filename,load_filename)
+    nbrs = NearestNeighbors(n_neighbors=20)
+    Sb = []
+    Sw = []
+    for i in range(0,features_Vp.shape[0]):
+        for j in range(0,20):
+            Upnearest_same = nbrs.kneighbors(features_Vp[i], neighbors=20, return_distance=False)
+            Upnearest_diff = nbrs.kneighbors(features_Vp[i], neighbors=20, return_distance=False)
+
+            Sb += np.matmul((features_Vp[i]- Upnearest_diff[j]),np.transpose(features_Vp[i]- Upnearest_diff[j]))
+            Sw += np.matmul((features_Vp[i]- Upnearest_same[j]),np.transpose(features_Vp[i]- Upnearest_same[j]))
+
+
+    object_fuction_numerator = np.matmul(np.matmul(np.transpose(weights),Sb),weights)
+    object_fuction_denominator = np.matmul(np.matmul(np.transpose(weights),Sw),weights)
+    object_fuction = np.divide(object_fuction_numerator,object_fuction_denominator)
+
+    return object_fuction
+
+def solve_p(learning_rate,Niter,var_p):
+    object_function = - get_object_function(graph_filename,load_filename)
+    gradients = tf.gradients(object_function, var_p)
+    gradients = list(zip(gradients, var_p))
+
+    # Create optimizer and apply gradient descent to the trainable variables
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+    train_op = optimizer.apply_gradients(grads_and_vars=gradients)
+
+    with tf.Session as sess:
+        # Initialize all variables
+        sess.run(tf.global_variables_initializer())
+        for i in range(Niter):
+            sess.run(train_op)
+
+
+def get_features_Vp(graph_filename,load_filename):
+    features,labels= get_fc7.get_fc7(graph_filename,load_filename)
+    features_Vp=[]
+    for i in range(len(features)):
+        feat = dtpm(features[i])
+        features_Vp.append(feat)
+    features_Vp = np.asarray(features_Vp, dtype=np.float32)
+    return features_Vp,labels
+
+def save_features_Vp(graph_filename,load_filename,save_filename):
+    features_Vp,labels= get_features_Vp(graph_filename, load_filename)
+    print(features_Vp.shape)
+    np.save(save_filename, features_Vp)
 
 if __name__ == '__main__':
 
     graph_filename = 'alexnet.pb'
     data_root = './'
+    learning_rate = 0.001
 
     if len(sys.argv) > 1:
         if sys.argv[1] == '-t':
@@ -106,12 +165,6 @@ if __name__ == '__main__':
         print('please input the arguments,e.g.\n python dtpm.py -t\n python dtpm.py -v')
         exit(0)
 
-    features = get_fc7.get_fc7(graph_filename,load_filename)
-    features_Up=[]
-    for i in range(len(features)):
-        feat = dtpm(features[i])
-        features_Up.append(feat)
+    save_features_Vp(graph_filename, load_filename, save_filename)
 
-    features_Up = np.asarray(features, dtype=np.float32)
-    print(features_Up.shape)
-    np.save(save_filename, features_Up)
+    solve_weights(graph_filename, load_filename)
