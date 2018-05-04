@@ -42,11 +42,11 @@ def dtpm(features):
                  [0,0,0,0,0,W_L2,0],
                  [0,0,0,0,0,0,W_L2]]
 
-    features_Vp = np.concatenate((L0, L1_1, L1_2, L2_1, L2_2, L2_3, L2_4), axis=0)
+    features_Vp = np.concatenate((W_L0*L0, W_L1*L1_1, W_L1*L1_2, W_L2*L2_1, W_L2*L2_2, W_L2*L2_3, W_L2*L2_4), axis=0)
 
-    features_Up = np.matmul(Weights_L,features_Vp)
+    #features_Up = np.matmul(Weights_L,features_Vp)
 
-    return features_Up
+    return features_Vp
 
 def lpnorm_pooling(features_Ln):
     result = np.max(features_Ln,axis=0)
@@ -67,9 +67,9 @@ def div_L1(num):
 
 
 def div_L2(num):
-    [a, b] = div_L2(num)
-    [c, d] = div_L2(a)
-    [e, f] = div_L2(b)
+    [a, b] = div_L1(num)
+    [c, d] = div_L1(a)
+    [e, f] = div_L1(b)
 
     return [c, d, e, f]
 
@@ -112,6 +112,6 @@ if __name__ == '__main__':
         feat = dtpm(features[i])
         features_Up.append(feat)
 
-    features_Up = np.asarray(features, dtype=np.float32)
+    features_Up = np.asarray(features_Up, dtype=np.float32)
     print(features_Up.shape)
     np.save(save_filename, features_Up)

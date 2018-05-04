@@ -36,7 +36,7 @@ load_emodb.maybe_download(weights_path,weights_path_url,'./')
 
 # Learning params
 learning_rate = 0.001
-num_epochs = 300 
+num_epochs = 300
 batch_size = 30
 # Network params
 dropout_rate = 0.5
@@ -81,8 +81,10 @@ training_init_op = iterator.make_initializer(tr_data.data)
 validation_init_op = iterator.make_initializer(val_data.data)
 
 # TF placeholder for graph input and output
-x = tf.placeholder(tf.float32, [batch_size, 227, 227, 3])
-y = tf.placeholder(tf.float32, [batch_size, num_classes])
+#x = tf.placeholder(tf.float32, [batch_size, 227, 227, 3])
+#y = tf.placeholder(tf.float32, [batch_size, num_classes])
+x = tf.placeholder(tf.float32, [None, 227, 227, 3],name='input')
+y = tf.placeholder(tf.float32, [None, num_classes])
 keep_prob = tf.placeholder(tf.float32)
 
 # Initialize model
@@ -108,6 +110,9 @@ with tf.name_scope("train"):
     # Create optimizer and apply gradient descent to the trainable variables
     optimizer = tf.train.GradientDescentOptimizer(learning_rate)
     train_op = optimizer.apply_gradients(grads_and_vars=gradients)
+
+with tf.name_scope("test"):
+    prob = tf.nn.softmax(score, name='prob')
 
 # Add gradients to summary
 for gradient, var in gradients:

@@ -110,3 +110,8 @@ venv.bak/
 # Dataset
 Dataset/
 bvlc_alexnet.npy
+
+# modelfile
+*.pb
+*.npy
+*.m

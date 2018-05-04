@@ -35,8 +35,9 @@ def get_fc7(graph_filename,load_filename):
     features = []
     for i in range(len(paths)):
 
-        # print(paths[i])
+        print(paths[i])
         images = utils.load_inputs(paths[i])
+        #print(images)
         images = np.asarray(images, dtype=np.float32)
 
         with tf.Session(graph=graph) as sess:
