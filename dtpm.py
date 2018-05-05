@@ -44,20 +44,25 @@ def dtpm(features):
                  [0,0,0,0,0,W_L2,0],
                  [0,0,0,0,0,0,W_L2]]
 
-    features_Vp = np.concatenate((L0, L1_1, L1_2, L2_1, L2_2, L2_3, L2_4), axis=0)
+    features_Vp = np.concatenate((W_L0*L0, W_L1*L1_1, W_L1*L1_2, W_L2*L2_1, W_L2*L2_2, W_L2*L2_3, W_L2*L2_4), axis=0)
 
-    features_Up = np.matmul(Weights_L,features_Vp)
+    #features_Up = np.matmul(Weights_L,features_Vp)
 
-    return features_Up
+    return features_Vp
 
-def lpnorm_pooling(features_Ln,var_p):
+def lpnorm_pooling(features_Ln):
     '''
     :param features_Ln:
     :param var_p: 1-average pooling, np.inf-max pooling
     :return:
     '''
-    lpnorm = np.linalg.norm(features_Ln,ord=var_p)
-    result = lpnorm * (1/features_Ln.shape[0])**var_p
+    var_p = 1  # average pooling
+    var_p = np.inf  # max pooling
+    lpnorm = np.linalg.norm(features_Ln,ord=var_p,axis=0)
+    result = lpnorm * (1/features_Ln.shape[0])**(1/var_p)
+
+    result = np.max(features_Ln,axis = 0)
+    print result
 
     return result
 
@@ -83,8 +88,7 @@ def div_L2(num):
     return [c, d, e, f]
 
 
-def solve_weights(graph_filename,load_filename):
-    features_Vp, labels = get_features_Vp(graph_filename, load_filename)
+def solve_weights(features_Vp,labels):
     clf = lda.LinearDiscriminantAnalysis(solver='eigen',shrinkage=None,priors=None,
                                          n_components=None)
     clf.fit(features_Vp, labels)
@@ -138,10 +142,13 @@ def get_features_Vp(graph_filename,load_filename):
     features_Vp = np.asarray(features_Vp, dtype=np.float32)
     return features_Vp,labels
 
-def save_features_Vp(graph_filename,load_filename,save_filename):
-    features_Vp,labels= get_features_Vp(graph_filename, load_filename)
+def save_features_Up(features_Vp,weights):
     print(features_Vp.shape)
-    np.save(save_filename, features_Vp)
+    if weights == 1:
+        features_Up=features_Vp
+    else:
+        features_Up = np.matmul(features_Vp,weights)
+    np.save(save_filename, features_Up)
 
 if __name__ == '__main__':
 
@@ -154,17 +161,34 @@ if __name__ == '__main__':
             save_filename= 'train_features.npy'
             load_filename= 'Dataset/train.txt'
             print ('save train_fetures')
+
         elif sys.argv[1] == '-v':
             save_filename = 'test_features.npy'
             load_filename = 'Dataset/val.txt'
             print ('save test_fetures')
-        else:
-            print('please input the arguments,e.g.\n python dtpm.py -t\n python dtpm.py -v')
-            exit(0)
+        # without tpm and lp_norm pooling
+        features_Vp, labels = get_features_Vp(graph_filename, load_filename)
+
+        if sys.argv[2] == '-n':
+            save_features_Up(features_Vp, 1)
+            print('origin')
+        # solve weights
+        elif sys.argv[2] == '-w':
+            weights = solve_weights(features_Vp, labels)
+            save_features_Up(features_Vp, save_filename)
+            print('solve_w')
+        # without lp_norm pooling
+
+        elif sys.argv[2] == '-p':
+            print('solve_p')
+
     else:
         print('please input the arguments,e.g.\n python dtpm.py -t\n python dtpm.py -v')
         exit(0)
 
-    save_features_Vp(graph_filename, load_filename, save_filename)
 
-    solve_weights(graph_filename, load_filename)
+
+
+
+
+

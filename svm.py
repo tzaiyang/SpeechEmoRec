@@ -5,8 +5,8 @@ from sklearn.externals import joblib
 
 train_feature_file = 'train_features.npy'
 test_feature_file = 'test_features.npy'
-test_data_path = 'Dataset/train.txt'
-train_data_path = 'Dataset/val.txt'
+test_data_path = 'Dataset/val.txt'
+train_data_path = 'Dataset/train.txt'
 data_root = './'
 
 train_paths, train_labels = utils.load_paths(train_data_path, data_root)
@@ -18,6 +18,7 @@ y_train = np.array(train_labels, dtype=np.uint8)
 X_test = np.load(test_feature_file)
 y_test = np.array(test_labels, dtype=np.uint8)
 
+print(X_train.shape,y_train.shape,X_test.shape,y_test.shape)
 clf = SVC(probability=True)
 clf.fit(X_train, y_train)
 

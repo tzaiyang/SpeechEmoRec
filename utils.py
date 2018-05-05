@@ -1,9 +1,9 @@
 import tensorflow as tf
 import os
-#import cv2
+# import cv2
+import scipy as sp
 import numpy as np
 import re
-import matplotlib.pyplot as plt
 
 
 IMAGENET_MEAN = [123.68, 116.779, 103.939]
@@ -17,22 +17,22 @@ def load_inputs(img_path):
     img = []
 
     for i in range(len(images)):
-        # # load and preprocess the image
-        img_string = tf.read_file(images[i])
-        img_decoded = tf.image.decode_png(img_string, channels=3)
-        img_resized = tf.image.resize_images(img_decoded, [227, 227])
-        img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
-        # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
-        img.append(img_bgr)
-        # print(images[i])
+#        # # load and preprocess the image
+#        img_string = tf.read_file(images[i])
+#        img_decoded = tf.image.decode_png(img_string, channels=3)
+#        img_resized = tf.image.resize_images(img_decoded, [227, 227])
+#        img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
+#        # RGB -> BGR
+#        img_bgr = img_centered[:, :, ::-1]
+#        img.append(img_bgr)
+#        # print(images[i])
 
-        # im = cv2.imread(images[i])
-        # im = cv2.resize(im, (227, 227))
-        # im = im -IMAGENET_MEAN
-        # # im = im[:, :, ::-1]
-        # img.append(im)
-
+         im = sp.misc.imread(images[i])
+         im = sp.misc.imresize(im, (227, 227))
+         im = im -IMAGENET_MEAN
+         # im = im[:, :, ::-1]
+         img.append(im)
+         
     return img
 
 
@@ -40,9 +40,9 @@ def load_images(image_path):
     images = []
     files = os.listdir(image_path)
     # print(files)
-    files = sorted(files, key=lambda i: int(re.match(r'(\d+)', i).group()))
-    for file in files:
-        filename = os.path.join(image_path, file)
+    permutation = np.random.permutation(len(files))
+    for i in permutation:
+        filename = os.path.join(image_path, files[i])
         if os.path.isfile(filename):
             images.append(filename)
 
