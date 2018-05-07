@@ -1,6 +1,6 @@
 import tensorflow as tf
 import os
-# import cv2
+import cv2
 import scipy as sp
 import numpy as np
 import re
@@ -27,11 +27,18 @@ def load_inputs(img_path):
 #        img.append(img_bgr)
 #        # print(images[i])
 
-         im = sp.misc.imread(images[i])
-         im = sp.misc.imresize(im, (227, 227))
+#         im = sp.misc.imread(images[i])
+#         im = sp.misc.imresize(im, (227, 227))
+#         im = im -IMAGENET_MEAN
+#         # im = im[:, :, ::-1]
+#         img.append(im)
+
+         im = cv2.imread(images[i])
+         im = cv2.resize(im, (227, 227))
          im = im -IMAGENET_MEAN
          # im = im[:, :, ::-1]
          img.append(im)
+         
          
     return img
 
@@ -40,9 +47,9 @@ def load_images(image_path):
     images = []
     files = os.listdir(image_path)
     # print(files)
-    permutation = np.random.permutation(len(files))
-    for i in permutation:
-        filename = os.path.join(image_path, files[i])
+#    permutation = np.random.permutation(len(files))
+    for filei in files:
+        filename = os.path.join(image_path, filei)
         if os.path.isfile(filename):
             images.append(filename)
 

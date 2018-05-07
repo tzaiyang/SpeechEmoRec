@@ -56,13 +56,15 @@ def lpnorm_pooling(features_Ln):
     :param var_p: 1-average pooling, np.inf-max pooling
     :return:
     '''
-    var_p = 1  # average pooling
-    var_p = np.inf  # max pooling
+    var_p = 2.14  # average pooling
+#   var_p = np.inf  # max pooling
     lpnorm = np.linalg.norm(features_Ln,ord=var_p,axis=0)
     result = lpnorm * (1/features_Ln.shape[0])**(1/var_p)
 
+    #print(result)
     result = np.max(features_Ln,axis = 0)
-    print result
+    #result = np.average(features_Ln,axis = 0)
+    #print(result)
 
     return result
 
@@ -71,15 +73,11 @@ def div_L0(num):
     [c, d, e, f] = div_L2(num)
 
     return [a, b], [c, d, e, f]
-
-
 def div_L1(num):
     a = num // 2
     b = num - a
 
     return [a, b]
-
-
 def div_L2(num):
     [a, b] = div_L1(num)
     [c, d] = div_L1(a)
@@ -87,18 +85,18 @@ def div_L2(num):
 
     return [c, d, e, f]
 
-
 def solve_weights(features_Vp,labels):
-    clf = lda.LinearDiscriminantAnalysis(solver='eigen',shrinkage=None,priors=None,
-                                         n_components=None)
+    clf = lda.LinearDiscriminantAnalysis()#solver='eigen',shrinkage='auto',priors=None,n_components=None)
     clf.fit(features_Vp, labels)
-    print(clf.predict(features_Vp[0]))
-    print(clf.coef_)
-    return clf.coef_
+#    print(clf.predict(features_Vp[0]))
+    #print(clf.coef_)
+    features_Up = clf.transform(features_Vp)
+    print(clf.coef_.shape,features_Up.shape)
+    return clf.coef_,features_Up
 
-def get_object_function(graph_filename,load_filename):
-    features_Vp, labels = get_features_Vp(graph_filename, load_filename)
-    weights = solve_weights(graph_filename,load_filename)
+def get_object_function(features):
+    features_Vp, labels = get_features_Vp(features)
+    weights = solve_weights(features_Vp,labels)
     nbrs = NearestNeighbors(n_neighbors=20)
     Sb = []
     Sw = []
@@ -133,21 +131,25 @@ def solve_p(learning_rate,Niter,var_p):
             sess.run(train_op)
 
 
-def get_features_Vp(graph_filename,load_filename):
-    features,labels= get_fc7.get_fc7(graph_filename,load_filename)
+def get_features_Vp(features):
     features_Vp=[]
     for i in range(len(features)):
         feat = dtpm(features[i])
         features_Vp.append(feat)
     features_Vp = np.asarray(features_Vp, dtype=np.float32)
-    return features_Vp,labels
+    return features_Vp
 
-def save_features_Up(features_Vp,weights):
-    print(features_Vp.shape)
-    if weights == 1:
+def save_features_Up(features_Vp,weights,save_filename):
+    print(features_Vp.shape,weights.shape[0])
+    if weights.shape[0] == 1:
         features_Up=features_Vp
+        print('Up=Vp')
     else:
-        features_Up = np.matmul(features_Vp,weights)
+        features_Up = np.multiply(features_Vp,weights)
+        print(weights.shape[0])
+        print(features_Up.shape)
+        print('Up=W*Vp')
+        
     np.save(save_filename, features_Up)
 
 if __name__ == '__main__':
@@ -156,39 +158,70 @@ if __name__ == '__main__':
     data_root = './'
     learning_rate = 0.001
 
+    train_utterance_file = 'train_utterance.npy'
+    train_features_file = 'train_features.npy'
+    train_filename= 'Dataset/train.txt'
+    
+    test_utterance_file = 'test_utterance.npy'
+    test_features_file = 'test_features.npy'
+    test_filename = 'Dataset/val.txt'
+
+
     if len(sys.argv) > 1:
-        if sys.argv[1] == '-t':
-            save_filename= 'train_features.npy'
-            load_filename= 'Dataset/train.txt'
-            print ('save train_fetures')
+        if sys.argv[1] == '-s':
+            train_features,labels= get_fc7.get_fc7(graph_filename,train_filename)
+            np.save(train_features_file, train_features)
+            test_features,labels= get_fc7.get_fc7(graph_filename,test_filename)
+            np.save(test_features_file, test_features)
+            print('save features')
 
-        elif sys.argv[1] == '-v':
-            save_filename = 'test_features.npy'
-            load_filename = 'Dataset/val.txt'
-            print ('save test_fetures')
         # without tpm and lp_norm pooling
-        features_Vp, labels = get_features_Vp(graph_filename, load_filename)
-
-        if sys.argv[2] == '-n':
-            save_features_Up(features_Vp, 1)
-            print('origin')
+        elif sys.argv[1] == '-n':
+            train_features = np.load(train_features_file)
+            features_Vp = get_features_Vp(train_features)
+            weights = np.array([1])
+            save_features_Up(features_Vp, weights,train_utterance_file)
+           
+            test_features = np.load(test_features_file)
+            features_Vp = get_features_Vp(test_features)
+            save_features_Up(features_Vp, weights,test_utterance_file)
+            print('save utterance')
+            
         # solve weights
-        elif sys.argv[2] == '-w':
-            weights = solve_weights(features_Vp, labels)
-            save_features_Up(features_Vp, save_filename)
+        elif sys.argv[1] == '-w':
+            print('solve_w')
+            train_features = np.load(train_features_file)
+            features_Vp = get_features_Vp(train_features)
+            paths,labels = utils.load_paths(train_filename,'./')
+            labels = np.asarray(labels)
+            print(features_Vp.shape,labels.shape)
+            weights,features_Up = solve_weights(features_Vp, labels)
+            weights = np.array([1])
+            save_features_Up(features_Up,weights,train_utterance_file)
+
+
+            test_features = np.load(test_features_file)
+            features_Vp = get_features_Vp(test_features)
+            paths,labels = utils.load_paths(test_filename,'./')
+            labels = np.asarray(labels)
+            print(features_Vp.shape,labels.shape)
+            weights,features_Up = solve_weights(features_Vp, labels)
+            weights = np.array([1])
+            save_features_Up(features_Up,weights,test_utterance_file)
+            
             print('solve_w')
         # without lp_norm pooling
 
-        elif sys.argv[2] == '-p':
+        elif sys.argv[1] == '-p':
             print('solve_p')
+
+        else:
+            print('please input the arguments,e.g.\n python dtpm.py -s\n python dtpm.py -n')
+            exit(0)
+
 
     else:
         print('please input the arguments,e.g.\n python dtpm.py -t\n python dtpm.py -v')
         exit(0)
-
-
-
-
-
 
 

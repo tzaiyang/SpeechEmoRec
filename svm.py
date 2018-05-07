@@ -3,8 +3,8 @@ from sklearn.svm import SVC
 import utils
 from sklearn.externals import joblib
 
-train_feature_file = 'train_features.npy'
-test_feature_file = 'test_features.npy'
+train_utterance_file = 'train_utterance.npy'
+test_utterance_file = 'test_utterance.npy'
 test_data_path = 'Dataset/val.txt'
 train_data_path = 'Dataset/train.txt'
 data_root = './'
@@ -12,10 +12,10 @@ data_root = './'
 train_paths, train_labels = utils.load_paths(train_data_path, data_root)
 test_paths, test_labels = utils.load_paths(test_data_path, data_root)
 
-X_train = np.load(train_feature_file)
+X_train = np.load(train_utterance_file)
 y_train = np.array(train_labels, dtype=np.uint8)
 
-X_test = np.load(test_feature_file)
+X_test = np.load(test_utterance_file)
 y_test = np.array(test_labels, dtype=np.uint8)
 
 print(X_train.shape,y_train.shape,X_test.shape,y_test.shape)
