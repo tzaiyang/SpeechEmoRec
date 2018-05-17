@@ -30,7 +30,7 @@ enterface_labels_dict = {'sa':0,
                          'su':5
                         }                         
 class DatasetDir:
-    def __init__(self,root_dir,labels_dict):
+    def __init__(self,root_dir):
         self.DataRoot = root_dir
         self.wav= root_dir+"wav"
         self.wav_count = 0
@@ -48,13 +48,14 @@ class DatasetDir:
         self.train_segments=root_dir+'train_segments.npy'
         self.test_segments=root_dir+'test_segments.npy'
 
-        self.labels_dict = labels_dict
-        self.nclasses = len(labels_dict)
-
         if root_dir == EMODB_ROOT:
             self.val_speaker = '09'
+            self.labels_dict = emodb_labels_dict
         elif root_dir == ENTERFACE_ROOT:
             self.val_speaker = 's15'
+            self.labels_dict = enterface_labels_dict
+        
+        self.nclasses = len(self.labels_dict)
 
     def percent_bar(self,numerator,denominator):
         percent = 1.0 * numerator/ denominator * 100
@@ -97,5 +98,5 @@ class DatasetDir:
         val_file.close()
 
 
-DataDir = DatasetDir(ENTERFACE_ROOT,enterface_labels_dict)
+DataDir = DatasetDir(EMODB_ROOT)
 

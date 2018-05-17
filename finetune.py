@@ -28,8 +28,8 @@ Configuration Part.
 # Path to the textfiles for the trainings and validation set
 DataDir = path.DataDir
 root_dir = DataDir.DataRoot
-train_file = DataDir.train_file
-val_file = DataDir.val_file
+train_file = DataDir.train_segments_path
+val_file = DataDir.val_segments_path
 
 weights_path_url = 'http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/bvlc_alexnet.npy'
 
