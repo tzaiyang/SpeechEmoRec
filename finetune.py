@@ -20,19 +20,21 @@ from alexnet import AlexNet
 from datagenerator import ImageDataGenerator
 from datetime import datetime
 import load_emodb
-
+import path
 """
 Configuration Part.
 """
 
 # Path to the textfiles for the trainings and validation set
-train_file = 'Dataset/train_file.txt'
-val_file = 'Dataset/val_file.txt'
+DataDir = path.DataDir
+root_dir = DataDir.DataRoot
+train_file = DataDir.train_file
+val_file = DataDir.val_file
 
 weights_path_url = 'http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/bvlc_alexnet.npy'
 
-weights_path = weights_path_url.split('/')[-1]
-load_emodb.maybe_download(weights_path,weights_path_url,'./')
+weights_path = root_dir+weights_path_url.split('/')[-1]
+load_emodb.maybe_download(weights_path,weights_path_url)
 
 # Learning params
 learning_rate = 0.001
@@ -40,7 +42,7 @@ num_epochs = 300
 batch_size = 30
 # Network params
 dropout_rate = 0.5
-num_classes = 7
+num_classes = DataDir.nclasses
 train_layers = ['fc6','fc7','fc8']
 
 # How often we want to write the tf.summary data to disk
@@ -233,5 +235,5 @@ with tf.Session(config=config) as sess:
 
     graph = tf.graph_util.convert_variables_to_constants(sess, sess.graph_def, ['test/prob'])
 
-    alexnet_file = 'alexnet.pb'
+    alexnet_file = DataDir.alexnet 
     tf.train.write_graph(graph, '.', alexnet_file, as_text=False)

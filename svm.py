@@ -2,12 +2,14 @@ import numpy as np
 from sklearn.svm import SVC
 import utils
 from sklearn.externals import joblib
+import path
 
-train_utterance_file = 'train_utterance.npy'
-test_utterance_file = 'test_utterance.npy'
-test_data_path = 'Dataset/val.txt'
-train_data_path = 'Dataset/train.txt'
-data_root = './'
+DataDir = path.DataDir
+train_utterance_file = DataDir.train_utterance
+test_utterance_file = DataDir.test_utterance
+train_data_path = DataDir.train_path
+test_data_path = DataDir.val_path
+data_root = DataDir.DataRoot
 
 train_paths, train_labels = utils.load_paths(train_data_path, data_root)
 test_paths, test_labels = utils.load_paths(test_data_path, data_root)
@@ -25,16 +27,15 @@ clf.fit(X_train, y_train)
 num_test = 10
 
 print('training phrase')
-
-print(clf.predict([X_train[i] for i in range(num_test)]))
-print([y_train[i] for i in range(num_test)])
-
+#print(clf.predict([X_train[i] for i in range(num_test)]))
+#print([y_train[i] for i in range(num_test)])
 print(clf.score(X_train, y_train))
 
-print('testing phrase')
-print(clf.predict([X_test[i] for i in range(num_test)]))
-print([y_test[i] for i in range(num_test)])
 
+
+print('testing phrase')
+#print(clf.predict([X_test[i] for i in range(num_test)]))
+#print([y_test[i] for i in range(num_test)])
 print(clf.score(X_test, y_test))
 
 svm_model_file = 'svm_model.m'

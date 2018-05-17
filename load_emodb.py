@@ -6,26 +6,27 @@ import shutil
 import sys
 from six.moves import urllib
 import tarfile
+import path
 
-def load_data(DatasetDir,filename,source_url, obj_directory):
-    dataset_file = os.path.join(DatasetDir, filename)
-    if not os.path.exists(dataset_file):
-        tarpath = maybe_download(filename,source_url,DatasetDir)
+def load_data(server_file,source_url, obj_directory):
+    if not os.path.exists(server_file):
+        tarpath = maybe_download(server_file,source_url)
 
     if not os.path.exists(obj_directory):
-        untar(DatasetDir+filename, filename.split('.')[0])
-        build_class_directories(filename,obj_directory)
+        untar(server_file, server_file.split('.')[0])
+        build_class_directories(server_file,obj_directory)
 
-def maybe_download(filename, source_url, work_directory):
-    if not os.path.exists(work_directory):
-        os.mkdir(work_directory)
-    filepath = os.path.join(work_directory, filename)
-    if not os.path.exists(filepath):
+def maybe_download(filename, source_url):
+    datadir_root = ''.join(filename.split('/')[:-1])
+    filepath = ''
+    if not os.path.exists(datadir_root): 
+        os.mkdir(datadir_root)
+    if not os.path.exists(filename):
         print("Downloading %s from %s, Please "
               "wait..."%(filename,source_url))
         filepath, _ = urllib.request.urlretrieve(source_url,
-                                                 filepath, reporthook)
-        statinfo = os.stat(filepath)
+                                                 filename, reporthook)
+        statinfo = os.stat(filename)
         print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
 
     return filepath
@@ -44,17 +45,6 @@ def reporthook(blocknum, blocksize, totalsize):
         sys.stderr.write("read %d\n" % (readsofar,))
 
 def build_class_directories(filename,dir):
-    # dir_id = 0
-    # class_dir = os.path.join(dir, str(dir_id))
-    # if not os.path.exists(class_dir):
-    #     os.mkdir(class_dir)
-    # for i in range(1, 1361):
-    #     fname = "image_" + ("%.4i" % i) + ".jpg"
-    #     os.rename(os.path.join(dir, fname), os.path.join(class_dir, fname))
-    #     if i % 80 == 0 and dir_id < 16:
-    #         dir_id += 1
-    #         class_dir = os.path.join(dir, str(dir_id))
-    #         os.mkdir(class_dir)
     os.rename('%s/wav'%filename.split('.')[0],dir)
     shutil.rmtree(filename.split('.')[0])
 
@@ -86,4 +76,4 @@ def untar(fname, extract_dir):
 if __name__ == "__main__":
     url = 'http://www.emodb.bilderbar.info/download/download.zip'
     server_fname = url.split('/')[-1]
-    load_data(DatasetDir="Dataset/", filename=server_fname, source_url=url,obj_directory='Dataset/EMODB')
+    load_data(server_file=path.DataDir.DataRoot+server_fname,source_url=url,obj_directory=path.DataDir.wav)

@@ -5,9 +5,7 @@
 This project aims to implement speech emotion recognition strategy proposed in *Speech Emotion Recognition Using Deep Convolutional Neural Network and Discriminant Temporal Pyramid Matching*
 
 ## Runtime enviorment
-*CPU Host :*
-+ ubuntu16.04
-+ python3.5
+*CPU Host :* + ubuntu16.04 + python3.5
 + tensorflow1.7.0
 
 *GPU Server :*
@@ -17,16 +15,26 @@ This project aims to implement speech emotion recognition strategy proposed in *
 + cudnn7.0
 
 ## Instructions
-1. Loading Berlin Database of Emotional Speech!
+### Preprocessing Data
+Update path of dataset from path.py 
+#### Berlin Dataset 
+* Loading Berlin Database of Emotional Speech!
 > python load_emodb.py
-2. Preprocessing Data
+#### eNTERFACE Dataset
+* Update the dataset root
+
+### Preprocessing Data
 > python melSpec.py
-3. Finetune AlexNet with Tensorflow
+
+### Feature Extracting 
+* Finetune AlexNet with Tensorflow
 > python finetune.py
-4. Discriminant Temporal Pyramid Matching
-> python dtpm.py -t
-> python dtpm.py -v
-5. Support Vector Machine
+* Discriminant Temporal Pyramid Matching
+> python dtpm.py -s  
+> python dtpm.py -n
+
+### Classfier
+* Support Vector Machine
 > python svm.py
 
 ## Refrences:

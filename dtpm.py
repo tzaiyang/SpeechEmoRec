@@ -5,6 +5,7 @@ import sys
 import get_fc7
 import utils
 import tensorflow as tf
+import path
 
 def dtpm(features):
     '''
@@ -153,27 +154,28 @@ def save_features_Up(features_Vp,weights,save_filename):
     np.save(save_filename, features_Up)
 
 if __name__ == '__main__':
-
-    graph_filename = 'alexnet.pb'
-    data_root = './'
+    DataDir = path.DataDir
+    graph_filename = DataDir.alexnet
+    data_root = DataDir.DataRoot
     learning_rate = 0.001
 
-    train_utterance_file = 'train_utterance.npy'
-    train_features_file = 'train_features.npy'
-    train_filename= 'Dataset/train.txt'
+    train_utterance_file = DataDir.train_utterance
+    train_features_file = DataDir.train_segments
+    train_filename = DataDir.train_path
     
-    test_utterance_file = 'test_utterance.npy'
-    test_features_file = 'test_features.npy'
-    test_filename = 'Dataset/val.txt'
+    test_utterance_file = DataDir.test_utterance
+    test_features_file = DataDir.test_segments 
+    test_filename = DataDir.val_path
 
 
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':
             train_features,labels= get_fc7.get_fc7(graph_filename,train_filename)
             np.save(train_features_file, train_features)
+            print('save train features segments')
             test_features,labels= get_fc7.get_fc7(graph_filename,test_filename)
             np.save(test_features_file, test_features)
-            print('save features')
+            print('save test features segments')
 
         # without tpm and lp_norm pooling
         elif sys.argv[1] == '-n':
@@ -181,11 +183,12 @@ if __name__ == '__main__':
             features_Vp = get_features_Vp(train_features)
             weights = np.array([1])
             save_features_Up(features_Vp, weights,train_utterance_file)
+            print('save test features utterance')
            
             test_features = np.load(test_features_file)
             features_Vp = get_features_Vp(test_features)
             save_features_Up(features_Vp, weights,test_utterance_file)
-            print('save utterance')
+            print('save test features utterance')
             
         # solve weights
         elif sys.argv[1] == '-w':

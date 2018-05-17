@@ -2,6 +2,7 @@ import os
 import tensorflow as tf
 import utils
 import numpy as np
+import path
 
 def load_graph(frozen_graph_filename):
 
@@ -23,8 +24,8 @@ def load_graph(frozen_graph_filename):
 def get_fc7(graph_filename,load_filename):
     graph = load_graph(graph_filename)
 
-    for op in graph.get_operations():
-        print(op.name, op.values())
+    #for op in graph.get_operations():
+    #    print(op.name, op.values())
 
     input = graph.get_tensor_by_name('prefix/input:0')
     prob = graph.get_tensor_by_name('prefix/test/prob:0')
@@ -33,22 +34,20 @@ def get_fc7(graph_filename,load_filename):
 
     paths, labels = utils.load_paths(load_filename, './')
     features = []
-    for i in range(len(paths)):
-
-        print(paths[i])
-        images = utils.load_inputs(paths[i])
-        #print(images)
-        images = np.asarray(images, dtype=np.float32)
-
-        with tf.Session(graph=graph) as sess:
-            # with tf.device('gpu:/0'):
+    with tf.Session(graph=graph) as sess:
+    # with tf.device('gpu:/0'):
+        for i in range(len(paths)):
+            path.DataDir.percent_bar(i+1,len(paths))
+            #print(paths[i])
+            images = utils.load_inputs(paths[i])
+            #print(images)
+            images = np.asarray(images, dtype=np.float32)
             out = sess.run(fc7, feed_dict={
                 input: images,
                 keep_prob: 1.
             })
-
-        features.append(out)
-        print('Gain %d utterance feature' % i)
+            features.append(out)
+            #print('Gain %d utterance feature' % i)
 
     return features,labels
 
