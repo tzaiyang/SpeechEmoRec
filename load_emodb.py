@@ -20,7 +20,7 @@ def maybe_download(filename, source_url):
     datadir_root = ''.join(filename.split('/')[:-1])
     filepath = ''
     if not os.path.exists(datadir_root): 
-        os.mkdir(datadir_root)
+        os.makedirs(datadir_root)
     if not os.path.exists(filename):
         print("Downloading %s from %s, Please "
               "wait..."%(filename,source_url))

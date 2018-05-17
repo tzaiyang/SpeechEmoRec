@@ -40,6 +40,7 @@ def gen_utterance_melspec(wav_path):
     # Sxx = librosa.feature.melspectrogram(S=np.abs(Zxx),n_mels=64, fmin=20, fmax=8000)
     # method 2:hanning window
     Sxx = librosa.feature.melspectrogram(y=wavedata,sr=framerate,n_fft=(int)(25*framerate/1000),hop_length=(int)((10)*framerate/1000),n_mels=64,fmin=20,fmax=8000)
+    #librosa.feature.mfcc()
     #librosa.time_to_frames()
     #print(Sxx.shape)
     return Sxx
@@ -103,7 +104,7 @@ def save_dcnn_input(X,pic_path):
     # pri_image.resize((227,227),Image.ANTIALIAS).save(pic_path)
 
 
-def gen_dcnn_input(wav_path,savepath):
+def gen_dcnn_input(wav_path,savepath,nwavs):
     utterance_melspec = gen_utterance_melspec(wav_path)
     if _DEBUG_:
         save_utterance(utterance_melspec,savepath)
@@ -111,7 +112,7 @@ def gen_dcnn_input(wav_path,savepath):
     segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=64-30)
     
     if segments_melspec.shape[0] == 0:
-        DataDir.nwavs-=1
+        nwavs-=1
         print("%s is too short!!!"%wav_path)
     else:
         if not _DEBUG_:
@@ -158,18 +159,21 @@ if __name__ == '__main__':
             os.makedirs(DataDir.DEBUG)
     
     wave_filenames = os.listdir(DataDir.wav)
+    nwavs= len(wave_filenames)
+    wav_count = 0
     for filename in wave_filenames:
-        DataDir.wav_count+=1
-        DataDir.percent_bar(DataDir.wav_count,DataDir.nwavs)
         wav_file = '%s/%s' % (DataDir.wav, filename)
         DataDir.stat_labels_pos(filename)
         
         if _DEBUG_:
             save_file= DataDir.DEBUG
-            gen_dcnn_input(wav_file, save_file)
+            gen_dcnn_input(wav_file, save_file,nwavs)
             print(filename)
             break
         else:
             save_file= '%s/%s' % (DataDir.DCNN_IN, filename)
-        gen_dcnn_input(wav_file, save_file)
+        
+        wav_count+=1
+        DataDir.percent_bar(wav_count,nwavs)
+        gen_dcnn_input(wav_file, save_file,nwavs)
 

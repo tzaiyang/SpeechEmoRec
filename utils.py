@@ -1,6 +1,6 @@
 import tensorflow as tf
 import os
-import cv2
+# import cv2
 import scipy as sp
 import numpy as np
 import re
@@ -8,7 +8,6 @@ import re
 
 IMAGENET_MEAN = [123.68, 116.779, 103.939]
 # IMAGENET_MEAN = [117, 117, 117]
-
 
 def load_inputs(img_path):
 
@@ -27,17 +26,17 @@ def load_inputs(img_path):
 #        img.append(img_bgr)
 #        # print(images[i])
 
-#         im = sp.misc.imread(images[i])
-#         im = sp.misc.imresize(im, (227, 227))
-#         im = im -IMAGENET_MEAN
-#         # im = im[:, :, ::-1]
-#         img.append(im)
+        im = sp.misc.imread(images[i])
+        im = sp.misc.imresize(im, (227, 227))
+        im = im -IMAGENET_MEAN
+        # im = im[:, :, ::-1]
+        img.append(im)
 
-         im = cv2.imread(images[i])
-         im = cv2.resize(im, (227, 227))
-         im = im -IMAGENET_MEAN
-         # im = im[:, :, ::-1]
-         img.append(im)
+        #  im = cv2.imread(images[i])
+        #  im = cv2.resize(im, (227, 227))
+        #  im = im -IMAGENET_MEAN
+        #  # im = im[:, :, ::-1]
+        #  img.append(im)
          
          
     return img
@@ -68,3 +67,14 @@ def load_paths(data_path, data_root):
             labels.append(label)
 
     return paths, labels
+
+def load_labels(data_path, data_root):
+    labels = []
+    with open(data_path, 'r') as f:
+        for line in f.readlines():
+            label = line.strip('\n').split(' ')[-1]
+            labels.append(label)
+
+    y = np.array(labels, dtype=np.uint8)
+
+    return y

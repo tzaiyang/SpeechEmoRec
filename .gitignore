@@ -106,9 +106,11 @@ venv.bak/
 *.xml
 *.iml
 
+# vscode
+.vscode/
 
 # Dataset
-Dataset/
+EMODB/
 bvlc_alexnet.npy
 
 # modelfile

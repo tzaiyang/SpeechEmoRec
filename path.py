@@ -1,9 +1,9 @@
 from __future__ import division, print_function, absolute_import
 import os
 
-EMODB_ROOT= '/home/datasets/tzaiyang/EMODB/'
+EMODB_ROOT= 'EMODB/'
 ENTERFACE_ROOT = '/home/datasets/public/eNTERFACE/'
-BAULMS_ROOT=''
+BAULMS_ROOT='BAULMS/'
 
 #
 # labels_dict = {'W':[1,0,0,0,0,0,0],
@@ -14,13 +14,13 @@ BAULMS_ROOT=''
 #                'T':[0,0,0,0,0,1,0],
 #                'N':[0,0,0,0,0,0,1]}
 
-emodb_labels_dict = {'W':0,
-               'L':1,
-               'E':2,
-               'A':3,
-               'F':4,
-               'T':5,
-               'N':6
+emodb_labels_dict = {'W':0, # anger
+               'L':1, # boredom
+               'E':2, # disgust
+               'A':3, # fear/anxiety
+               'F':4, # happiness
+               'T':5, # sadness
+               'N':6  # neutral
 }
 enterface_labels_dict = {'sa':0,
                          'fe':1,
@@ -31,22 +31,24 @@ enterface_labels_dict = {'sa':0,
                         }                         
 class DatasetDir:
     def __init__(self,root_dir):
+        if not os.path.exists(root_dir):
+            os.makedirs(root_dir)
         self.DataRoot = root_dir
         self.wav= root_dir+"wav"
-        self.wav_count = 0
-        self.nwavs= len(os.listdir(self.wav))
         self.DCNN_IN= root_dir+"DCNN_IN"
         self.DEBUG= root_dir+"DEBUG"
         self.train_segments_path= root_dir+"train_segments.txt"
         self.val_segments_path= root_dir+"val_segments.txt"
         self.train_path= root_dir+"train.txt"
         self.val_path= root_dir+"val.txt"
-        
-        self.alexnet=root_dir+"alexnet.pb"
+
         self.train_utterance=root_dir+'train_utterance.npy'
         self.test_utterance =root_dir+'test_utterance.npy'
         self.train_segments=root_dir+'train_segments.npy'
         self.test_segments=root_dir+'test_segments.npy'
+        
+        self.alexnet=root_dir+"alexnet.pb"
+        self.svm = root_dir+'svm_model.m'
 
         if root_dir == EMODB_ROOT:
             self.val_speaker = '09'
