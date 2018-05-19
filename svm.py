@@ -36,7 +36,7 @@ if __name__ == '__main__':
     svm_model_file = DataDir.svm
 
     #for i in range(0,len(DataDir.val_speaker)):
-    for i in range(2,9):
+    for i in range(0,10):
         X_train,y_train = get_input_fetures(train_utterance_file[i],train_data_path[i])
         X_test,y_test = get_input_fetures(test_utterance_file[i],test_data_path[i])
         print("input shape:")

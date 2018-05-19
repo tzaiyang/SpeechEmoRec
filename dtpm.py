@@ -171,7 +171,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':
             #for i in range(0,len(DataDir.val_speaker)):
-            for i in range(2,9):
+            for i in range(9,10):
                 train_features,labels= get_fc7.get_fc7(graph_filename[i],train_filename[i])
                 np.save(train_features_file[i], train_features)
                 print('save speaker %s train features segments'%DataDir.val_speaker[i])
@@ -182,7 +182,7 @@ if __name__ == '__main__':
         # without tpm and lp_norm pooling
         elif sys.argv[1] == '-n':
             #for i in range(0,len(DataDir.val_speaker)):
-            for i in range(2,9):
+            for i in range(9,10):
                 train_features = np.load(train_features_file[i])
                 features_Vp = get_features_Vp(train_features)
                 weights = np.array([1])

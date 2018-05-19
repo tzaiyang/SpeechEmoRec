@@ -67,7 +67,7 @@ if __name__ == '__main__':
     class_names = ['anger','boredom','disgust','fear','happiness','sadness','neutral']
     cnf_matrix = np.zeros((7,7))
     #for i in range(0,len(DataDir.val_speaker)):
-    for i in range(0,9):
+    for i in [0,1,5,6,7]:#range(0,10):
         y_true = utils.load_labels(test_data_path[i],data_root)
         y_pred = svm.get_pred_labes(svm_model_file[i],test_utterance_file[i])
         
