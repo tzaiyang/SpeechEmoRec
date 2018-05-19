@@ -170,25 +170,29 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         if sys.argv[1] == '-s':
-            train_features,labels= get_fc7.get_fc7(graph_filename,train_filename)
-            np.save(train_features_file, train_features)
-            print('save train features segments')
-            test_features,labels= get_fc7.get_fc7(graph_filename,test_filename)
-            np.save(test_features_file, test_features)
-            print('save test features segments')
+            #for i in range(0,len(DataDir.val_speaker)):
+            for i in range(2,9):
+                train_features,labels= get_fc7.get_fc7(graph_filename[i],train_filename[i])
+                np.save(train_features_file[i], train_features)
+                print('save speaker %s train features segments'%DataDir.val_speaker[i])
+                test_features,labels= get_fc7.get_fc7(graph_filename[i],test_filename[i])
+                np.save(test_features_file[i], test_features)
+                print('save speaker %s test features segments'%DataDir.val_speaker[i])
 
         # without tpm and lp_norm pooling
         elif sys.argv[1] == '-n':
-            train_features = np.load(train_features_file)
-            features_Vp = get_features_Vp(train_features)
-            weights = np.array([1])
-            save_features_Up(features_Vp, weights,train_utterance_file)
-            print('save test features utterance')
+            #for i in range(0,len(DataDir.val_speaker)):
+            for i in range(2,9):
+                train_features = np.load(train_features_file[i])
+                features_Vp = get_features_Vp(train_features)
+                weights = np.array([1])
+                save_features_Up(features_Vp, weights,train_utterance_file[i])
+                print('save speaker %s train features utterance'%DataDir.val_speaker[i])
            
-            test_features = np.load(test_features_file)
-            features_Vp = get_features_Vp(test_features)
-            save_features_Up(features_Vp, weights,test_utterance_file)
-            print('save test features utterance')
+                test_features = np.load(test_features_file[i])
+                features_Vp = get_features_Vp(test_features)
+                save_features_Up(features_Vp, weights,test_utterance_file[i])
+                print('save speaker %s test features utterance'%DataDir.val_speaker[i])
             
         # solve weights
         elif sys.argv[1] == '-w':

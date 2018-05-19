@@ -16,38 +16,36 @@ def get_pred_labes(svm_model_file,test_utterance_file):
 
     return y_pred
 
+def get_input_fetures(features_file,label_file):
+    labels = utils.load_labels(label_file, data_root)
+    X = np.load(features_file)
+    y = np.array(labels, dtype=np.uint8)
+
+    return X,y
+
+
 if __name__ == '__main__':
     DataDir = path.DataDir
     train_utterance_file = DataDir.train_utterance
-    test_utterance_file = DataDir.test_utterance
     train_data_path = DataDir.train_path
+    
+    test_utterance_file = DataDir.test_utterance
     test_data_path = DataDir.val_path
+   
     data_root = DataDir.DataRoot
     svm_model_file = DataDir.svm
 
-    num_test = 10
-
-    train_paths, train_labels = utils.load_paths(train_data_path, data_root)
-    test_paths, test_labels = utils.load_paths(test_data_path, data_root)
-
-    X_train = np.load(train_utterance_file)
-    y_train = np.array(train_labels, dtype=np.uint8)
-
-    X_test = np.load(test_utterance_file)
-    y_test = np.array(test_labels, dtype=np.uint8)
-
-    print(X_train.shape,y_train.shape,X_test.shape,y_test.shape)
-    clf = SVC(probability=True)
-    clf.fit(X_train, y_train)
-
-    print('training phrase')
-    #print(clf.predict([X_train[i] for i in range(num_test)]))
-    #print([y_train[i] for i in range(num_test)])
-    print(clf.score(X_train, y_train))
-
-    print('testing phrase')
-    #print(clf.predict([X_test[i] for i in range(num_test)]))
-    #print([y_test[i] for i in range(num_test)])
-    print(clf.score(X_test, y_test))
-
-    joblib.dump(clf, svm_model_file)
+    #for i in range(0,len(DataDir.val_speaker)):
+    for i in range(2,9):
+        X_train,y_train = get_input_fetures(train_utterance_file[i],train_data_path[i])
+        X_test,y_test = get_input_fetures(test_utterance_file[i],test_data_path[i])
+        print("input shape:")
+        print(X_train.shape,y_train.shape,X_test.shape,y_test.shape)
+        print("starting training...")
+        clf = SVC(probability=True)
+        clf.fit(X_train, y_train)
+    
+        print("speaker %s train dataset accuracy: %10.8s"%(DataDir.val_speaker[i],clf.score(X_train, y_train)))
+        print("speaker %s test dataset accuracy: %10.8s"%(DataDir.val_speaker[i],clf.score(X_test, y_test)))
+    
+        joblib.dump(clf, svm_model_file[i])
