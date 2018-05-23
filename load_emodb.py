@@ -17,7 +17,7 @@ def load_data(server_file,source_url, obj_directory):
         build_class_directories(server_file,obj_directory)
 
 def maybe_download(filename, source_url):
-    datadir_root = ''.join(filename.split('/')[:-1])
+    datadir_root = path.DataDir.DataRoot
     filepath = ''
     if not os.path.exists(datadir_root): 
         os.makedirs(datadir_root)

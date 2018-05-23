@@ -238,7 +238,7 @@ if __name__ == '__main__':
     # Initialize model
     model = AlexNet(x, keep_prob, num_classes, train_layers,weights_path=weights_path)
     
-    for i in range(2,len(DataDir.val_speaker)):
+    for i in range(0,len(DataDir.val_speaker)):
     #for i in range(1):
         train_file = DataDir.train_segments_path[i]
         val_file = DataDir.val_segments_path[i]
