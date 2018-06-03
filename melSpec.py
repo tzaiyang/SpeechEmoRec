@@ -8,6 +8,7 @@ import librosa
 import librosa.display
 from pylab import *
 import path
+import shutil
 
 # if you want to see utterance mel spectrogram and delta,delta-delta picture,
 # set __DEBUG_ as True,and the pictures will be DEBUG directory
@@ -141,6 +142,34 @@ def gen_dcnn_input(wav_path,savepath,nwavs):
         if not _DEBUG_:
             DataDir.split_val_set(wav_path,pic_path,DataDir.train_segments_path,DataDir.val_segments_path)
         #dcnninname.write('%s %s\n' % (pic_path, labels_dict[filename]))
+        save_dcnn_input(images,pic_path)
+        # close path file 
+
+def wav_to_pics(wav_path,savepath,nwavs):
+    utterance_melspec = gen_utterance_melspec(wav_path)
+    segments_melspec = gen_segments_melspec(utterance_melspec,window_size=64,overlap_sz=64-30)
+    
+    if segments_melspec.shape[0] == 0:
+        nwavs-=1
+        print("%s is too short!!!"%wav_path)
+
+    if os.path.exists(savepath):
+        shutil.rmtree(savepath)
+
+    for num in range(0, segments_melspec.shape[0]):
+        static = librosa.power_to_db(segments_melspec[num], ref=np.max)
+        delta = librosa.feature.delta(static, order=1)
+        delta2 = librosa.feature.delta(static, order=2)
+
+        static = normlize(static)*255
+        delta = normlize(delta)*255
+        delta2 = normlize(delta2)*255
+
+        images = np.dstack((static,delta,delta2))
+        if not os.path.exists(savepath):
+            os.makedirs(savepath)   
+                   
+        pic_path = '%s/%d.png' % (savepath,num)
         save_dcnn_input(images,pic_path)
         # close path file 
 

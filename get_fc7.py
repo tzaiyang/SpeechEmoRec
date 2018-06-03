@@ -51,6 +51,22 @@ def get_fc7(graph_filename,load_filename):
 
     return features,labels
 
+def get_dcnn_out(graph_filename,pic_path):
+    graph = load_graph(graph_filename)
+    input = graph.get_tensor_by_name('prefix/input:0')
+    prob = graph.get_tensor_by_name('prefix/test/prob:0')
+    fc7 = graph.get_tensor_by_name('prefix/fc7/fc7:0')
+    keep_prob = graph.get_tensor_by_name('prefix/Placeholder_1:0')
+
+    with tf.Session(graph=graph) as sess:
+        images = utils.load_inputs(pic_path)
+        images = np.asarray(images, dtype=np.float32)
+        out = sess.run(fc7, feed_dict={input: images,keep_prob: 1.})
+        print(out.shape)
+
+    return out
+
+
 if __name__ == '__main__':
     print('test')
 
