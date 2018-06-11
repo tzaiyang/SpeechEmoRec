@@ -1,25 +1,4 @@
-"""This is an TensorFLow implementation of AlexNet by Alex Krizhevsky at all.
-
-Paper:
-(http://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf)
-
-Explanation can be found in my blog post:
-https://kratzert.github.io/2017/02/24/finetuning-alexnet-with-tensorflow.html
-
-This script enables finetuning AlexNet on any given Dataset with any number of
-classes. The structure of this script is strongly inspired by the fast.ai
-Deep Learning class by Jeremy Howard and Rachel Thomas, especially their vgg16
-finetuning script:
-Link:
-- https://github.com/fastai/courses/blob/master/deeplearning1/nbs/vgg16.py
-
-
-The pretrained weights can be downloaded here and should be placed in the same
-folder as this file:
-- http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/
-
-@author: Frederik Kratzert (contact: f.kratzert(at)gmail.com)
-"""
+#This is an TensorFLow implementation of AlexNet by Alex Krizhevsky at all.
 
 import tensorflow as tf
 import numpy as np
@@ -90,13 +69,7 @@ class AlexNet(object):
         self.fc8 = fc(dropout7, 4096, self.NUM_CLASSES, relu=False, name='fc8')
 
     def load_initial_weights(self, session):
-        """Load weights from file into network.
-
-        As the weights from http://www.cs.toronto.edu/~guerzhoy/tf_alexnet/
-        come as a dict of lists (e.g. weights['conv1'] is a list) and not as
-        dict of dicts (e.g. weights['conv1'] is a dict with keys 'weights' &
-        'biases') we need a special load function
-        """
+        #Load weights from file into network.
         # Load the weights into memory
         weights_dict = np.load(self.WEIGHTS_PATH, encoding='bytes').item()
 
@@ -126,7 +99,6 @@ def conv(x, filter_height, filter_width, num_filters, stride_y, stride_x, name,
          padding='SAME', groups=1):
     """Create a convolution layer.
 
-    Adapted from: https://github.com/ethereon/caffe-tensorflow
     """
     # Get number of input channels
     input_channels = int(x.get_shape()[-1])

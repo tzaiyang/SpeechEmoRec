@@ -12,11 +12,6 @@ class ImageDataGenerator(object):
     def __init__(self, txt_file, mode, batch_size, num_classes, shuffle=True,
                  buffer_size=1000):
         """Create a new ImageDataGenerator.
-        Recieves a path string to a text file, which consists of many lines,
-        where each line has first a path string to an image and seperated by
-        a space an integer, referring to the class number. Using this data,
-        this class will create TensrFlow datasets, that can be used to train
-        e.g. a convolutional neural network.
         Args:
             txt_file: Path to the text file.
             mode: Either 'training' or 'validation'. Depending on this value,

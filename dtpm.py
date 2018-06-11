@@ -131,6 +131,8 @@ def solve_p(learning_rate,Niter,var_p):
         for i in range(Niter):
             sess.run(train_op)
 
+    return var_p
+
 
 def get_features_Vp(features):
     features_Vp=[]
@@ -221,6 +223,8 @@ if __name__ == '__main__':
 
         elif sys.argv[1] == '-p':
             print('solve_p')
+            var_p = solve_p(learning_rate,Niter,var_p)
+            print(var_p)
 
         else:
             print('please input the arguments,e.g.\n python dtpm.py -s\n python dtpm.py -n')
